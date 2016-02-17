@@ -8,40 +8,8 @@ namespace RailwayOrientedProgramming.DAL
 {
     public class PersonContext
     {
-        //private static Result<Person, string> CheckAge(Person p)
-        //{
-        //    if (p.Age < 18)
-        //        return Result<Person, string>.FailWith("Too young!");
-        //    if (p.Age > 40)
-        //        return Result<Person, string>.FailWith("Too old!");
-        //    return Result<Person, string>.Succeed(p);
-        //}
-
-        //private static Result<Person, string> CheckClothes(Person p)
-        //{
-        //    if (p.Gender == Gender.Male && !p.Clothes.Contains("Tie"))
-        //        return Result<Person, string>.FailWith("Smarten up!");
-        //    if (p.Gender == Gender.Female && p.Clothes.Contains("Trainers"))
-        //        return Result<Person, string>.FailWith("Wear high heels!");
-        //    return Result<Person, string>.Succeed(p);
-        //}
-
-        //private static Result<Person, string> CheckSobriety(Person p)
-        //{
-        //    if (new[] { Sobriety.Drunk, Sobriety.Paralytic, Sobriety.Unconscious }.Contains(p.Sobriety))
-        //        return Result<Person, string>.FailWith("Sober up!");
-        //    return Result<Person, string>.Succeed(p);
-        //}
-
-        //public static Result<decimal, string> Validate(Person p)
-        //{
-        //    return from a in CheckAge(p)
-        //           from b in CheckClothes(a)
-        //           from c in CheckSobriety(b)
-        //           select c.Gender == Gender.Female ? 0m : 5m;
-        //}
-
-        public static List<Person> People { get; set; }
+        // In memory storage
+        public static List<Person> People { get; set; } = new List<Person>();
 
         private static Result<Person, string> ValidateEmail(Person p)
         {
@@ -87,6 +55,20 @@ namespace RailwayOrientedProgramming.DAL
             return Result<Person, string>.Succeed(p);
         }
 
+        // use map to adapt One track function that doesn't need error handling
+        private static Person StandardizeEmail(Person p)
+        {
+            p.Email = p.Email.ToLower().Trim();
+            return p;
+        }
+
+        private static Person Save(Person p)
+        {
+            p.ID = People.Count + 1;
+            People.Add(p);
+            return p;
+        }
+
         // Fail fast (at the first failure)
         public static Result<Person, string> Validate(Person p)
         {
@@ -117,18 +99,11 @@ namespace RailwayOrientedProgramming.DAL
 
         public static Result<Person, string> Add(Person p)
         {
-            //var result = ValidateAll(p);
-            var result = ValidateAllFunc(p);
-            if (result.IsBad)
-            {
-                return result;
-            }
-            else
-            {
-                p.ID = People.Count + 1;
-                People.Add(p);
-            }
-            return result;
+            //ValidateP
+            //ValidateAll(p);
+            return ValidateAllFunc(p)
+                            .Select(pe => StandardizeEmail(pe)) // one track function (use select/map)
+                            .Map(pe => Save(p)); // another one track function (use select/map)
         }
     }
 }

@@ -11,78 +11,43 @@ namespace RailwayOrientedProgramming.Controllers
         // GET: Person
         public ActionResult Index()
         {
-            return View();
-        }
-
-        // GET: Person/Details/5
-        public ActionResult Details(int id)
-        {
-            return View();
+            var model = PersonContext.People.Select(p => new PersonModel { Email = p.Email, FirstName = p.FirstName, LastName = p.LastName });
+            return View(model);
         }
 
         // GET: Person/Create
         public ActionResult Create() => View(new PersonModel());
-
 
         // POST: Person/Create
         [HttpPost]
         public ActionResult Create(PersonModel model)
         {
             var result = PersonContext.Add(model.ToPerson());
-            var view = result.Either(
-                            (msgs, p) => View(),
+            // Pattern Matching!!!
+            return result.Either(
+                            (msgs, p) => RedirectToAction("Index"),
                             (msgs) =>
                             {
                                 model.Messages = msgs.ToList();
-                                return View(model);
+                                return (ActionResult)View(model);
                             }
                             );
-
-            return view;
         }
 
-        // GET: Person/Edit/5
-        public ActionResult Edit(int id)
-        {
-            return View();
-        }
+        // GET: Person/Create
+        public ActionResult CreateImperative() => View(new PersonModel());
 
-        // POST: Person/Edit/5
         [HttpPost]
-        public ActionResult Edit(int id, FormCollection collection)
+        public ActionResult CreateImperative(PersonModel model)
         {
-            try
+            var result = ImperativePersonContext.Add(model.ToPerson());
+            if (result.Successful)
             {
-                // TODO: Add update logic here
-
                 return RedirectToAction("Index");
             }
-            catch
-            {
-                return View();
-            }
+            model.Messages.AddRange(result.Messages);
+            return View(model);
         }
 
-        // GET: Person/Delete/5
-        public ActionResult Delete(int id)
-        {
-            return View();
-        }
-
-        // POST: Person/Delete/5
-        [HttpPost]
-        public ActionResult Delete(int id, FormCollection collection)
-        {
-            try
-            {
-                // TODO: Add delete logic here
-
-                return RedirectToAction("Index");
-            }
-            catch
-            {
-                return View();
-            }
-        }
     }
 }

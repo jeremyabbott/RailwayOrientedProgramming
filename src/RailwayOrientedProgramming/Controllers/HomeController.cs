@@ -1,6 +1,4 @@
 ﻿using System.Web.Mvc;
-using Chessie.ErrorHandling.CSharp;
-using RailwayOrientedProgramming.DAL;
 
 namespace RailwayOrientedProgramming.Controllers
 {
@@ -8,19 +6,7 @@ namespace RailwayOrientedProgramming.Controllers
     {
         public ActionResult Index()
         {
-            var person = new Person();
-            var result = PersonContext.Validate(person); // Error "Too old!"
-
-            var view = result.Either(
-                (msgs, p) => View(),
-                (msgs) =>
-                {
-                    ViewBag.Issues = msgs.ToString();
-                    return View();
-                }
-                );
-
-            return view;
+            return View();
         }
 
         public ActionResult About()
